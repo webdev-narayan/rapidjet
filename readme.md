@@ -45,16 +45,44 @@ This command will prompt you to enter the model name and fields. For example, if
 ```
 user/
 |-- controllers/
-|   |-- userController.js
+|   |-- user.js
 |-- models/
-|   |-- userModel.js
+|   |-- user.js
 |-- middlewares/
-|   |-- userMiddleware.js
+|   |-- user.js
 |-- routes/
-|   |-- userRoutes.js
+|   |-- user.js
 ```
 
 The RESTful API for the `user` model is now ready to serve.
+
+### RESTful Routes
+
+The generated routes are fully RESTful, following best practices for REST APIs. For example, for a `user` model, the generated routes might look like this:
+
+```javascript
+import { Router } from 'express';
+import { create, find, update, destroy, findOne } from '../controllers/user.js';
+const router = Router();
+
+// Create user
+router.post("/api/users", [], create);
+
+// List users
+router.get("/api/users", [], find);
+
+// List Single user
+router.get("/api/users/:id", [], findOne);
+
+// Update users
+router.put("/api/users/:id", [], update);
+
+// Delete user
+router.delete("/api/users/:id", [], destroy);
+
+export default router;
+```
+
 
 ### Removing APIs
 
