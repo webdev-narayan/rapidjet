@@ -17,7 +17,7 @@ npm install rapidjet
 To initialize RapidJet in your project, run the following command:
 
 ```bash
-RapidJet init
+npx rapidjet init
 ```
 
 This command will create a `cli.config.js` file in your project directory with the following content:
@@ -37,7 +37,7 @@ You can customize the configuration according to your project needs. Available o
 To generate a new API, run the following command:
 
 ```bash
-RapidJet generate
+npx rapidjet generate
 ```
 
 This command will prompt you to enter the model name and fields. For example, if you enter `user` as the model name and `name:string,email:string` as the fields, RapidJet will create a folder named `user` inside the specified `apiPath` with the following structure:
@@ -90,7 +90,7 @@ export default router;
 To remove a generated API, run the following command:
 
 ```bash
-RapidJet remove modelName
+npx rapidjet remove modelName
 ```
 
 Replace `modelName` with the name of the model you want to remove. This command will delete the corresponding folder and its contents from the specified `apiPath`.

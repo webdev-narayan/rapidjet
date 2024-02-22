@@ -1,6 +1,6 @@
 {
   "name": "rapidjet",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "rapidjet is a command-line interface tool designed to simplify and expedite the process of creating RESTful APIs in Node.js. With rapidjet, developers can generate boilerplate code, endpoints, controllers, and more with just a few simple commands, streamlining the API development workflow. Whether you're a beginner looking to get started quickly or an experienced developer aiming to speed up your development process, rapidjet provides the tools you need to build robust APIs effortlessly.",
   "main": "index.js",
   "type": "module",
