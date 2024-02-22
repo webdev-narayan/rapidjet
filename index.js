@@ -13,10 +13,10 @@ program.command("init").description("Initialize the CLI configuration file").act
         output: process.stdout,
     });
 
-    const filePath = "cli.config.js";
+    const filePath = "rapidjet.config.js";
     fs.writeFileSync(filePath, `export default${JSON.stringify(contentfile.config)}`);
     rl.close();
-    console.log(`CLI has been initialized , A cli.config.json file has been created`);
+    console.log(`CLI has been initialized , A rapidjet.config.js file has been created`);
 });
 
 let content
@@ -24,13 +24,13 @@ let content
 program.command("generate").description("Generate model-related folders and files").action(async () => {
     try {
 
-        const configpath = path.join(process.cwd(), "cli.config.js")
+        const configpath = path.join(process.cwd(), "rapidjet.config.js")
         const config = await import(`file://${configpath}`)
         content = contentfile[config.default.orm];
         let length, sep, location;
         if (!config.default.apiPath || config.default.apiPath.trim() === "") {
-            console.log("apiPath not found in cli.config.js")
-            return { error: "apiPath not found in cli.config.js", message: "kindly initiaize the cli using init command" }
+            console.log("apiPath not found in rapidjet.config.js")
+            return { error: "apiPath not found in rapidjet.config.js", message: "kindly initiaize the cli using init command" }
         }
         if (config.default.apiPath.trim() === "") {
             length = 2
@@ -56,7 +56,7 @@ program.command("generate").description("Generate model-related folders and file
             rl.question("CLI configuration not found. Initialize now? (y/n)", async (anwer) => {
                 rl.close();
                 if (anwer.toLocaleLowerCase() === "y") {
-                    const filePath = "cli.config.js";
+                    const filePath = "rapidjet.config.js";
                     fs.writeFileSync(filePath, `export default ${JSON.stringify(contentfile.config)};\n`);
                     console.log(`CLI configuration initialized.\n A new file ${path.join(process.cwd(), filePath)} \n Please setup the config file and run 'generate' again.`);
 
@@ -157,7 +157,7 @@ function generateRouteFile(modelName, fields, config) {
 
 // remove files functinality
 async function removeModelFiles(modelName) {
-    const configpath = path.join(process.cwd(), "cli.config.js")
+    const configpath = path.join(process.cwd(), "rapidjet.config.js")
     const config = await import(`file://${configpath}`)
     const apiDirectory = path.join(process.cwd(), config.default.apiPath, modelName);
 

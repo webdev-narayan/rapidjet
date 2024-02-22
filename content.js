@@ -308,9 +308,8 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
     },
 
     config: {
-        "apiDirectory": "",
-        "databaseConnectionFile": "",
+        "apiPath": "src/api",
+        "databasePath": "database/index.js",
         "orm": "sequelize",
-        "db_connection": ""
     }
 }
