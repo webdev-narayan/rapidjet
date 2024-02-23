@@ -1,5 +1,8 @@
 # RapidJet
 
+![RapidJet Logo](./Rapid.png)
+
+
 RapidJet is a command-line tool designed to simplify the process of building APIs by generating boilerplate code quickly and easily.
 
 ## Installation
@@ -102,3 +105,10 @@ RapidJet currently supports generating APIs with Sequelize for PostgreSQL and Mo
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Keywords
+- Node.js
+- CLI
+- RESTful API
+- Express
+- rest api
