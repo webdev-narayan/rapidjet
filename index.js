@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { program } from "commander";
 import fs from "fs";
+import { readFile } from "fs/promises";
 import path from "path";
 import readline from "readline";
 import * as rimraf from "rimraf"; // Import the 'rimraf' package
@@ -13,10 +14,10 @@ program.command("init").description("Initialize the CLI configuration file").act
         output: process.stdout,
     });
 
-    const filePath = "rapidjet.config.js";
-    fs.writeFileSync(filePath, `export default${JSON.stringify(contentfile.config)}`);
+    const filePath = "rapidjet.config.json";
+    fs.writeFileSync(filePath, `${JSON.stringify(contentfile.config)}`);
     rl.close();
-    console.log(`CLI has been initialized , A rapidjet.config.js file has been created`);
+    console.log(`CLI has been initialized , A rapidjet.config.json file has been created`);
 });
 
 let content
@@ -24,31 +25,34 @@ let content
 program.command("generate").description("Generate model-related folders and files").action(async () => {
     try {
 
-        const configpath = path.join(process.cwd(), "rapidjet.config.js")
-        const config = await import(`file://${configpath}`)
-        content = contentfile[config.default.orm];
+        const configpath = path.join(process.cwd(), "rapidjet.config.json")
+        // const config = await import(`file://${configpath}.json`)
+        const jsonData = await readFile(`${configpath}`)
+        const config = JSON.parse(jsonData)
+        content = contentfile[config.orm];
         let length, sep, location;
-        if (!config.default.apiPath || config.default.apiPath.trim() === "") {
-            console.log("apiPath not found in rapidjet.config.js")
-            return { error: "apiPath not found in rapidjet.config.js", message: "kindly initiaize the cli using init command" }
+        let extenstion = config.typescript ? ".ts" : ".js"
+        if (!config.apiPath || config.apiPath.trim() === "") {
+            console.log("apiPath not found in rapidjet.config.json")
+            return { error: "apiPath not found in rapidjet.config.json", message: "kindly initiaize the cli using init command" }
         }
-        if (config.default.apiPath.trim() === "") {
+        if (config.apiPath.trim() === "") {
             length = 2
             sep = "../";
-            location = sep.repeat(length) + config.default.databasePath
+            location = sep.repeat(length) + config.databasePath
         } else {
-            length = 2 + config.default.apiPath.split("/").filter(item => item.trim() !== "").length
+            length = 2 + config.apiPath.split("/").filter(item => item.trim() !== "").length
             sep = "../"
-            location = sep.repeat(length) + config.default.databasePath
+            location = sep.repeat(length) + config.databasePath
         }
 
         const { modelName, fields } = await promptForModelInfo();
-        generateModelFiles(modelName, fields, config.default, location);
-        generateControllerFile(modelName, fields, config.default);
-        generateMiddlewareFile(modelName, fields, config.default);
-        generateRouteFile(modelName, fields, config.default);
+        generateModelFiles({ modelName, fields, config, location, extenstion });
+        generateControllerFile({ modelName, fields, config, extenstion });
+        generateMiddlewareFile({ modelName, fields, config, extenstion });
+        generateRouteFile({ modelName, fields, config, extenstion });
     } catch (error) {
-        if (error.code === "ERR_MODULE_NOT_FOUND") {
+        if (error.code === "ENOENT") {
             const rl = readline.createInterface({
                 input: process.stdin,
                 output: process.stdout,
@@ -56,8 +60,8 @@ program.command("generate").description("Generate model-related folders and file
             rl.question("CLI configuration not found. Initialize now? (y/n)", async (anwer) => {
                 rl.close();
                 if (anwer.toLocaleLowerCase() === "y") {
-                    const filePath = "rapidjet.config.js";
-                    fs.writeFileSync(filePath, `export default ${JSON.stringify(contentfile.config)};\n`);
+                    const filePath = "rapidjet.config.json";
+                    fs.writeFileSync(filePath, `${JSON.stringify(contentfile.config)}\n`);
                     console.log(`CLI configuration initialized.\n A new file ${path.join(process.cwd(), filePath)} \n Please setup the config file and run 'generate' again.`);
 
                 }
@@ -105,7 +109,7 @@ async function promptForModelInfo() {
 }
 
 
-function generateModelFiles(modelName, fields, config, location) {
+function generateModelFiles({ modelName, fields, config, location, extenstion }) {
     // const apiPath = path.join(process.cwd(), "src", "api", modelName);
     const apiDirectory = path.join(process.cwd(), config.apiPath, modelName);
     const modelsDirectory = path.join(apiDirectory, "models");
@@ -114,10 +118,10 @@ function generateModelFiles(modelName, fields, config, location) {
     // Create model file
     const modelFileContent = content.model({ modelName, fields, config, location });
     // const modelFileContent = generateModelFileContent(modelName, fields);
-    const modelFilePath = path.join(modelsDirectory, `${modelName}.js`);
+    const modelFilePath = path.join(modelsDirectory, `${modelName}${extenstion}`);
     fs.writeFileSync(modelFilePath, modelFileContent);
 }
-function generateControllerFile(modelName, fields, config) {
+function generateControllerFile({ modelName, fields, config, extenstion }) {
     // const apiDirectory = path.join(process.cwd(), "src", "api", modelName);
     const apiDirectory = path.join(process.cwd(), config.apiPath, modelName);
 
@@ -127,11 +131,11 @@ function generateControllerFile(modelName, fields, config) {
     // Create controller file
     const controllerFileContent = content.controller({ modelName });
     // const controllerFileContent = generateControllerFileContent(modelName);
-    const controllerFilePath = path.join(controllersDirectory, `${modelName}.js`);
+    const controllerFilePath = path.join(controllersDirectory, `${modelName}${extenstion}`);
     fs.writeFileSync(controllerFilePath, controllerFileContent);
 }
 
-function generateMiddlewareFile(modelName, fields, config) {
+function generateMiddlewareFile({ modelName, fields, config, extenstion }) {
     const apiDirectory = path.join(process.cwd(), config.apiPath, modelName);
     const middlewaresDirectory = path.join(apiDirectory, "middlewares");
     fs.mkdirSync(middlewaresDirectory, { recursive: true });
@@ -139,11 +143,11 @@ function generateMiddlewareFile(modelName, fields, config) {
     // Create middleware file
     const middlewareFileContent = content.middleware({ fields });
     // const middlewareFileContent = generateMiddlewareFileContent(modelName, fields);
-    const middlewareFilePath = path.join(middlewaresDirectory, `${modelName}.js`);
+    const middlewareFilePath = path.join(middlewaresDirectory, `${modelName}${extenstion}`);
     fs.writeFileSync(middlewareFilePath, middlewareFileContent);
 }
 
-function generateRouteFile(modelName, fields, config) {
+function generateRouteFile({ modelName, fields, config, extenstion }) {
     const apiDirectory = path.join(process.cwd(), config.apiPath, modelName);
     const routesDirectory = path.join(apiDirectory, "routes");
     fs.mkdirSync(routesDirectory, { recursive: true });
@@ -151,15 +155,17 @@ function generateRouteFile(modelName, fields, config) {
     // Create route file
     const routeFileContent = content.routes({ modelName });
     // const routeFileContent = generateRouteFileContent(modelName);
-    const routeFilePath = path.join(routesDirectory, `${modelName}.js`);
+    const routeFilePath = path.join(routesDirectory, `${modelName}${extenstion}`);
     fs.writeFileSync(routeFilePath, routeFileContent);
 }
 
 // remove files functinality
 async function removeModelFiles(modelName) {
-    const configpath = path.join(process.cwd(), "rapidjet.config.js")
-    const config = await import(`file://${configpath}`)
-    const apiDirectory = path.join(process.cwd(), config.default.apiPath, modelName);
+    const configpath = path.join(process.cwd(), "rapidjet.config.json")
+    // const config = await import(`file://${configpath}`)
+    const jsonData = await readFile(`${configpath}`)
+    const config = JSON.parse(jsonData)
+    const apiDirectory = path.join(process.cwd(), config.apiPath, modelName);
 
     // Check if the API directory exists
     if (fs.existsSync(apiDirectory)) {
@@ -170,3 +176,9 @@ async function removeModelFiles(modelName) {
         console.log(`Model "${modelName}" does not exist.`);
     }
 }
+
+
+
+export const { getPagination } = await import("./src/services/pagination.js");
+export const { getMeta } = await import("./src/services/pagination.js");
+export const { errorResponse } = await import("./src/services/errorResponse.js");

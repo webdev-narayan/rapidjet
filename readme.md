@@ -1,6 +1,6 @@
 # RapidJet
 
-![RapidJet Logo](./Rapid.png)
+![RapidJet Logo](https://github.com/webdev-narayan/rapidjet/blob/master/Rapid.png)
 
 
 RapidJet is a command-line tool designed to simplify the process of building APIs by generating boilerplate code quickly and easily.
@@ -98,6 +98,15 @@ npx rapidjet remove modelName
 
 Replace `modelName` with the name of the model you want to remove. This command will delete the corresponding folder and its contents from the specified `apiPath`.
 
+
+### Pagination
+While working with rest api , pagination plays crucial role , we rapidjet provides -
+```javascript
+getPagination(); 
+getMeta()
+```
+getPagination() takes {page,pageSize}
+getMeta() takes response returned from getPagination() and count of the document
 ## Support
 
 RapidJet currently supports generating APIs with Sequelize for PostgreSQL and Mongoose for MongoDB. If you encounter any issues or have suggestions for improvement, please feel free to open an issue on [GitHub](https://github.com/webdev-narayan/RapidJet).

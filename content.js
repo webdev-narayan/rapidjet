@@ -1,5 +1,7 @@
-export default {
+import { readFile } from "fs/promises"
+let extenstion = await getExtension("rapidjet.config.json")
 
+export default {
     sequelize: {
         model({ fields, modelName, config, location }) {
             const modelDefinition = fields
@@ -24,12 +26,11 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
         controller({ modelName }) {
 
             return `
-                  import { getPagination, getMeta } from "../../../services/pagination.js";
-                  import ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)} from "../models/${modelName}.js";
-                  import { errorResponse } from "../../../services/errorResponse.js";
+                  import { getPagination, getMeta ,errorResponse } from "rapidjet"
+                  import ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)} from "../models/${modelName}${extenstion}";
                   import { request, response } from "express";
               
-                  export const create = async (req = request, res = response) => {
+                  export const create = async (req,res) => {
                       try {
                           const ${modelName} = await ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)}.create(req.body);
                           return res.status(200).send(${modelName});
@@ -39,7 +40,7 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
                       }
                   };
               
-                  export const find = async (req = request, res = response) => {
+                  export const find = async (req,res) => {
                       try {
                           const query = req.query;
                           const pagination = await getPagination(query.pagination);
@@ -55,7 +56,7 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
                       }
                   };
               
-                  export const findOne = async (req = request, res = response) => {
+                  export const findOne = async (req,res) => {
                       try {
                           const { id } = req.params;
                           const ${modelName} = await ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)}.findByPk(id);
@@ -69,7 +70,7 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
                       }
                   };
               
-                  export const update = async (req = request, res = response) => {
+                  export const update = async (req,res) => {
                       try {
                           const { id } = req.params;
                           const get${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)} = await ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)}.findByPk(id);
@@ -86,7 +87,7 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
                       }
                   };
               
-                  export const destroy = async (req = request, res = response) => {
+                  export const destroy = async (req,res) => {
                       try {
                           const { id } = req.params;
                           const get${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)} = await ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)}.findByPk(id);
@@ -107,7 +108,7 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
         routes({ modelName }) {
             return `
             import { Router } from 'express';
-            import { create, find, update, destroy, findOne } from '../controllers/${modelName}.js';
+            import { create, find, update, destroy, findOne } from '../controllers/${modelName}${extenstion}';
             const router = Router();
         
             // Create ${modelName}
@@ -137,8 +138,9 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
 
             return `
         import Joi from "joi";
-        
-        export const createRequest = async (req = request, res = response, next) => {
+        import {errorResponse} from "rapidjet"            
+
+        export const createRequest = async (req,res, next) => {
           const JoiSchema = Joi.object({
             ${JoiSchemaContent}
           });
@@ -170,21 +172,20 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
                 ${schemaDefinition}
             });
     
-            const ${modelName} = mongoose.model('${modelName}', ${modelName}Schema);
+            const ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)} = mongoose.model('${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)}', ${modelName}Schema);
     
-            export default ${modelName};
+            export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
         `;
         },
         controller({ modelName }) {
             const capitalizeModelName = modelName.charAt(0).toUpperCase() + modelName.slice(1);
 
             return `
-            import { getPagination, getMeta } from "../../../services/pagination.js";
-            import ${capitalizeModelName} from "../models/${modelName}.js";
-            import { errorResponse } from "../../../services/errorResponse.js";
+            import { getPagination, getMeta ,errorResponse } from "rapidjet"
+            import ${capitalizeModelName} from "../models/${modelName}${extenstion}";
             import { request, response } from "express";
             
-            export const create = async (req = request, res = response) => {
+            export const create = async (req,res) => {
                         try {
                             const ${modelName} = new ${capitalizeModelName}(req.body);
                             await ${modelName}.save();
@@ -195,7 +196,7 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
                         }
                     };
             
-                    export const find = async (req = request, res = response) => {
+                    export const find = async (req,res) => {
                         try {
                             const query = req.query;
                             const pagination = await getPagination(query.pagination);
@@ -208,7 +209,7 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
                         }
                     };
             
-                    export const findOne = async (req = request, res = response) => {
+                    export const findOne = async (req,res) => {
                         try {
                             const { id } = req.params;
                             const ${modelName} = await ${capitalizeModelName}.findById(id);
@@ -222,7 +223,7 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
                         }
                     };
             
-                    export const update = async (req = request, res = response) => {
+                    export const update = async (req,res) => {
                         try {
                             const { id } = req.params;
                             const ${modelName} = await ${capitalizeModelName}.findByIdAndUpdate(id, req.body, { new: true });
@@ -236,7 +237,7 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
                         }
                     };
             
-                    export const destroy = async (req = request, res = response) => {
+                    export const destroy = async (req,res) => {
                         try {
                             const { id } = req.params;
                             const ${modelName} = await ${capitalizeModelName}.findByIdAndDelete(id);
@@ -254,7 +255,7 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
         routes({ modelName }) {
             return `
             import { Router } from 'express';
-            import { create, find, update, destroy, findOne } from '../controllers/${modelName}.js';
+            import { create, find, update, destroy, findOne } from '../controllers/${modelName}${extenstion}';
             const router = Router();
         
             // Create ${modelName}
@@ -284,9 +285,8 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
 
             return `
         import Joi from "joi";
-        import { path } from 'path';
-
-        export const createRequest = async (req = request, res = response, next) => {
+        import {errorResponse} from "rapidjet"            
+        export const createRequest = async (req,res, next) => {
           const JoiSchema = Joi.object({
             ${JoiSchemaContent}
           });
@@ -311,5 +311,17 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
         "apiPath": "src/api",
         "databasePath": "database/index.js",
         "orm": "sequelize",
+        "typescript": false
     }
+}
+
+async function getExtension(filename) {
+    try {
+        const jsonData = await readFile(`${filename}`)
+        const config = JSON.parse(jsonData)
+        return config.typescript ? ".ts" : ".js"
+    } catch (error) {
+        return ".js"
+    }
+
 }
