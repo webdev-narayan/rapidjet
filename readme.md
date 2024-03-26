@@ -23,14 +23,15 @@ To initialize RapidJet in your project, run the following command:
 npx rapidjet init
 ```
 
-This command will create a `cli.config.js` file in your project directory with the following content:
+This command will create a `rapidjet.config.json` file in your project directory with the following content:
 
-```javascript
-export default {
+```json
+{
     "apiPath": "src/api",
     "databasePath": "database/index.js",
     "orm": "sequelize",
-};
+    "typescript": false
+}
 ```
 
 You can customize the configuration according to your project needs. Available options for `orm` are "sequelize" for PostgreSQL and "mongoose" for MongoDB.

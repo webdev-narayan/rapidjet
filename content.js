@@ -183,13 +183,12 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
             return `
             import { getPagination, getMeta ,errorResponse } from "rapidjet"
             import ${capitalizeModelName} from "../models/${modelName}${extenstion}";
-            import { request, response } from "express";
             
             export const create = async (req,res) => {
                         try {
                             const ${modelName} = new ${capitalizeModelName}(req.body);
                             await ${modelName}.save();
-                            return res.status(200).send(${modelName});
+                            return res.status(200).send({data:${modelName}});
                         } catch (error) {
                             console.log(error);
                             return res.status(500).send(errorResponse({ status: 500, message: "Internal Server Error", details: error.message }));
@@ -201,7 +200,8 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
                             const query = req.query;
                             const pagination = await getPagination(query.pagination);
                             const ${modelName}s = await ${capitalizeModelName}.find().skip(pagination.offset).limit(pagination.limit);
-                            const meta = await getMeta(pagination, ${modelName}s.length);
+                            const counts = await ${capitalizeModelName}.countDocuments({});
+                            const meta = await getMeta(pagination, counts);
                             return res.status(200).send({ data: ${modelName}s, meta });
                         } catch (error) {
                             console.log(error);
@@ -257,9 +257,9 @@ export default ${modelName.slice(0, 1).toUpperCase() + modelName.slice(1)};
             import { Router } from 'express';
             import { create, find, update, destroy, findOne } from '../controllers/${modelName}${extenstion}';
             const router = Router();
-        
+            import {createRequest} from "../middlewares/${modelName}.js"
             // Create ${modelName}
-            router.post("/api/${modelName}s", [], create);
+            router.post("/api/${modelName}s", [createRequest], create);
         
             // List ${modelName}s
             router.get("/api/${modelName}s", [], find);
